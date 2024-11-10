@@ -2,9 +2,9 @@
 
 The vite plugin that automatically generates sidebar data by scanning directories, based on vitepress
 
-[![Npm](https://img.shields.io/npm/v/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
-[![Download](https://img.shields.io/npm/dt/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
-[![License](https://img.shields.io/github/license/qc2168/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
+[![Npm](https://img.shields.io/npm/v/@jiek/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
+[![Download](https://img.shields.io/npm/dt/@jiek/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
+[![License](https://img.shields.io/github/license/nwylzw/vite-plugin-vitepress-auto-sidebar)](http://blog.csdn.net/a_zhon)
 
 ## ✨ Feature
 
@@ -18,17 +18,17 @@ install vite-plugin-vitepress-auto-sidebar
 
 ```bash
 # recommend using pnpm packageManager
-pnpm i vite-plugin-vitepress-auto-sidebar
+pnpm i @jiek/vite-plugin-vitepress-auto-sidebar
 # or yarn
-yarn add vite-plugin-vitepress-auto-sidebar
+yarn add @jiek/vite-plugin-vitepress-auto-sidebar
 # or npm
-npm install vite-plugin-vitepress-auto-sidebar
+npm install @jiek/vite-plugin-vitepress-auto-sidebar
 ```
 
 add plugin in `.vitepress/config.ts`
 
 ```typescript
-import AutoSidebar from 'vite-plugin-vitepress-auto-sidebar';
+import AutoSidebar from '@jiek/vite-plugin-vitepress-auto-sidebar';
 
 export default defineConfig({
   vite: {
@@ -70,4 +70,4 @@ export default defineConfig({
 
 ## License
 
-[MIT](./LICENSE) License © 2023 [QC2168](https://github.com/QC2168)
+[MIT](./LICENSE) License © 2024 [YiJie](https://github.com/nwylzw)
