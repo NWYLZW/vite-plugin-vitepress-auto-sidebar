@@ -1,4 +1,9 @@
 import type { DefaultTheme, SiteConfig } from 'vitepress';
+
+export type SidebarItem = DefaultTheme.SidebarItem & {
+  fname: string
+};
+
 export interface SidebarPluginOptionType {
   ignoreList?: Array<RegExp | string>
   path?: string
@@ -7,6 +12,18 @@ export interface SidebarPluginOptionType {
   deletePrefix?: string | RegExp
   collapsed?: boolean
   /**
+   * Directory meta file name
+   * ```json
+   * {
+   *   "title": "xxx",
+   *   "order": ["b.md", "a.md"]
+   * }
+   * ```
+   *
+   * @default '.sidebar.meta.json'
+   */
+  metaFilename?: string
+  /**
    * Whether to get the sidebar title from the file
    *
    * @default false
@@ -14,9 +31,10 @@ export interface SidebarPluginOptionType {
   titleFromFile?: boolean
   titleFromFileByYaml?: boolean
   sideBarResolved?: (data: DefaultTheme.SidebarMulti) => DefaultTheme.SidebarMulti
-  sideBarItemsResolved?: (data: DefaultTheme.SidebarItem[]) => DefaultTheme.SidebarItem[]
+  sideBarItemsResolved?: (data: SidebarItem[]) => SidebarItem[]
   beforeCreateSideBarItems?: (data: string[]) => string[]
 }
+
 export interface UserConfig {
   vitepress: SiteConfig
 }

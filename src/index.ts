@@ -1,8 +1,10 @@
-import { join } from 'path';
-import { readdirSync, statSync } from 'fs';
-import { type DefaultTheme } from 'vitepress/theme';
+import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+
 import { type Plugin, type ViteDevServer } from 'vite';
-import type { SidebarPluginOptionType, UserConfig } from './types';
+import { type DefaultTheme } from 'vitepress/theme';
+
+import type { SidebarItem, SidebarPluginOptionType, UserConfig } from './types';
 
 import { DEFAULT_IGNORE_FOLDER, log, removePrefix, getTitleFromFile, getTitleFromFileByYaml } from './utils';
 
@@ -19,8 +21,8 @@ function extractTitleFn ({ titleFromFile = false, titleFromFileByYaml = false })
 
 function createSideBarItems (
   targetPath: string,
-  ...reset: string[]
-): DefaultTheme.SidebarItem[] {
+  ...rest: string[]
+): SidebarItem[] {
   const {
     ignoreIndexItem,
     deletePrefix,
@@ -31,7 +33,7 @@ function createSideBarItems (
     titleFromFile = false,
     titleFromFileByYaml = false
   } = option;
-  const rawNode = readdirSync(join(targetPath, ...reset)).reduce<string[]>(
+  const rawNode = readdirSync(join(targetPath, ...rest)).reduce<string[]>(
     // make index.md to the first
     (acc, cur) => [
       'index.md', 'index.MD'
@@ -41,55 +43,69 @@ function createSideBarItems (
     []
   );
   const node = beforeCreateSideBarItems?.(rawNode) ?? rawNode;
-  const currentDir = join(targetPath, ...reset);
+  const currentDir = join(targetPath, ...rest);
   if (ignoreIndexItem && node.length === 1 && node[0] === 'index.md') {
     return [];
   }
-  const result: DefaultTheme.SidebarItem[] = [];
+  let result: SidebarItem[] = [];
 
   const exec = extractTitleFn({ titleFromFile, titleFromFileByYaml });
   for (const fname of node) {
-    if (statSync(join(targetPath, ...reset, fname)).isDirectory()) {
+    if (statSync(join(targetPath, ...rest, fname)).isDirectory()) {
       if (ignoreList.some(item => item === fname || (item instanceof RegExp && item.test(fname)))) {
         continue;
       }
+
+      const metaFilename = option.metaFilename ?? '.sidebar.meta.json';
+      const metaPath = join(currentDir, fname, metaFilename);
+      const meta: {
+        title?: string
+        order?: string[]
+      } = existsSync(metaPath)
+        ? JSON.parse(readFileSync(metaPath, { encoding: 'utf-8' }))
+        : undefined;
       // is directory
       // ignore cur node if items length is 0
-      const items = createSideBarItems(join(targetPath), ...reset, fname);
+      const items = createSideBarItems(join(targetPath), ...rest, fname);
       let exsistIndex = false;
       // replace directory name, if yes
       let text = fname;
-      // get the title in index.md file
-      if (exec) {
-        const filenames = [
-          'index.md',
-          'index.MD',
-          `${fname}.md`
-        ];
+      if (meta) {
+        text = meta.title ?? text;
+      } else {
+        // get the title in index.md file
+        if (exec) {
+          const filenames = [
+            'index.md',
+            'index.MD',
+            `${fname}.md`
+          ];
 
-        for (const filename of filenames) {
-          const path = join(currentDir, fname, filename);
-          const title = exec(path);
-          if (title) {
-            text = title;
-            if (filename === 'index.md' || filename === 'index.MD') {
-              const index = items.findIndex(i => i.link?.endsWith('index.html'));
-              if (index !== -1) {
-                items.splice(index, 1);
-                exsistIndex = true;
+          for (const filename of filenames) {
+            const path = join(currentDir, fname, filename);
+            const title = exec(path);
+            if (title) {
+              text = title;
+              if (filename === 'index.md' || filename === 'index.MD') {
+                const index = items.findIndex(i => i.link?.endsWith('index.html'));
+                if (index !== -1) {
+                  items.splice(index, 1);
+                  exsistIndex = true;
+                }
               }
+              break;
             }
-            break;
           }
         }
-      }
-      if (deletePrefix) {
-        text = removePrefix(text, deletePrefix);
+        if (deletePrefix) {
+          text = removePrefix(text, deletePrefix);
+        }
       }
       if (items.length > 0) {
-        const sidebarItem: DefaultTheme.SidebarItem = {
+        const sidebarItem: SidebarItem = {
           text,
-          link: exsistIndex ? `/${[...reset, fname].join('/')}/` : undefined,
+          fname,
+          link: exsistIndex ? `/${[...rest, fname].join('/')}/` : undefined,
           items
         };
         // vitePress sidebar option collapsed
@@ -118,12 +134,33 @@ function createSideBarItems (
           text = title;
         }
       }
-      const item: DefaultTheme.SidebarItem = {
+      const item: SidebarItem = {
         text,
-        link: '/' + [...reset, `${fileName}.html`].join('/')
+        fname,
+        link: '/' + [...rest, `${fileName}.html`].join('/')
       };
       result.push(item);
     }
+  }
+
+  const metaFilename = option.metaFilename ?? '.sidebar.meta.json';
+  const metaPath = join(currentDir, metaFilename);
+  const meta: {
+    title?: string
+    order?: string[]
+  } = existsSync(metaPath)
+    ? JSON.parse(readFileSync(metaPath, { encoding: 'utf-8' }))
+    : undefined;
+  if (meta) {
+    const newResult = meta.order
+      ? meta.order
+        .map((item) => result.find((i) => i.fname === item))
+        .filter(<T>(i: T | undefined): i is T => !!i)
+      : result;
+    if (result.length !== newResult.length) {
+      console.warn(`Some items in the \`${metaPath}\` file are not found`);
+    }
+    result = newResult;
   }
   return sideBarItemsResolved?.(result) ?? result;
 }

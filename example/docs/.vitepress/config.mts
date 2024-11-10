@@ -14,6 +14,7 @@ export default defineConfig({
         nav: [
           { text: "home", link: "/a/" },
           { text: "note", link: "/a/note/" },
+          { text: "meta", link: "/a/meta/b" },
           { text: "nestedNote", link: "/a/nestedNote/first/first" }
         ]
       }
@@ -26,6 +27,7 @@ export default defineConfig({
         nav: [
           { text: "home", link: "/b/" },
           { text: "note", link: "/b/note/" },
+          { text: "meta", link: "/b/meta/b" },
           { text: "nestedNote", link: "/b/nestedNote/first/first" }
         ]
       }
