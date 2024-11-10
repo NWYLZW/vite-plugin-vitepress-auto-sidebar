@@ -216,24 +216,6 @@ export default function VitePluginVitePressAutoSidebar (
 ): Plugin {
   return {
     name: 'vite-plugin-vitepress-auto-sidebar',
-    configureServer ({
-      watcher,
-      restart
-    }: ViteDevServer) {
-      const fsWatcher = watcher.add('*.md');
-      fsWatcher.on('all', async (event, path) => {
-        if (event !== 'change') {
-          log(`${event} ${path}`);
-          try {
-            await restart();
-            log('update sidebar...');
-          } catch {
-            log(`${event} ${path}`);
-            log('update sidebar failed');
-          }
-        }
-      });
-    },
     config (config) {
       option = opt;
       const { path = '/docs' } = option;
