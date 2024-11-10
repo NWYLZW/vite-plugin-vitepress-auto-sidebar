@@ -1,17 +1,17 @@
 {
-  "name": "vite-plugin-vitepress-auto-sidebar",
+  "name": "@jiek/vite-plugin-vitepress-auto-sidebar",
   "type": "module",
   "version": "1.7.0",
   "packageManager": "pnpm@9.1.1",
   "description": "",
-  "author": "QC2168",
+  "author": "YiJie",
   "license": "MIT",
-  "homepage": "https://github.com/QC2168/vite-plugin-vitepress-auto-sidebar#readme",
+  "homepage": "https://github.com/NWYLZW/vite-plugin-vitepress-auto-sidebar#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/QC2168/vite-plugin-vitepress-auto-sidebar.git"
+    "url": "git@github.com:NWYLZW/vite-plugin-vitepress-auto-sidebar.git"
   },
-  "bugs": "https://github.com/QC2168/vite-plugin-vitepress-auto-sidebar/issues",
+  "bugs": "https://github.com/NWYLZW/vite-plugin-vitepress-auto-sidebar/issues",
   "keywords": [
     "vitepress",
     "vite",
@@ -53,6 +53,7 @@
   "devDependencies": {
     "@types/node": "^18.7.18",
     "@typescript-eslint/eslint-plugin": "^5.37.0",
+    "@typescript-eslint/parser": "^5.59.2",
     "bumpp": "^8.2.1",
     "eslint": "^8.40.0",
     "eslint-config-standard-with-typescript": "^31.0.0",
@@ -64,16 +65,14 @@
     "rimraf": "^3.0.2",
     "typescript": "^5.0.4",
     "unbuild": "^0.8.11",
-    "vite": "^5.1.6",
-    "vitepress": "1.0.0-rc.45"
+    "vite": "^5.4.10",
+    "vitepress": "^1.5.0"
   },
   "dependencies": {
-    "@typescript-eslint/parser": "^5.59.2",
-    "front-matter": "^4.0.2",
-    "picocolors": "^1.0.0"
+    "front-matter": "^4.0.2"
   },
   "peerDependencies": {
-    "vite": "^5.0.10",
-    "vitepress": "^1.0.0-rc.33"
+    "vite": "^5.4.10",
+    "vitepress": "^1.5.0"
   }
 }

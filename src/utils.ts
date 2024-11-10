@@ -1,10 +1,9 @@
-import c from 'picocolors';
 import { existsSync, readFileSync } from 'fs';
 import fm from 'front-matter';
 
 export const DEFAULT_IGNORE_FOLDER = ['scripts', 'components', 'assets', '.vitepress'];
 export function log (...info: string[]): void {
-  console.log(c.bold(c.cyan('[auto-sidebar]')), ...info);
+  console.log('[auto-sidebar]', ...info);
 }
 
 // remove the file prefix

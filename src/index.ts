@@ -8,7 +8,7 @@ import { DEFAULT_IGNORE_FOLDER, log, removePrefix, getTitleFromFile, getTitleFro
 
 let option: SidebarPluginOptionType;
 
-function extractTitleFn({ titleFromFile = false, titleFromFileByYaml = false }): ((file: string) => string | undefined) | undefined {
+function extractTitleFn ({ titleFromFile = false, titleFromFileByYaml = false }): ((file: string) => string | undefined) | undefined {
   if (titleFromFile) {
     return getTitleFromFile;
   } else if (titleFromFileByYaml) {
@@ -16,7 +16,8 @@ function extractTitleFn({ titleFromFile = false, titleFromFileByYaml = false }):
   }
   return undefined;
 }
-function createSideBarItems(
+
+function createSideBarItems (
   targetPath: string,
   ...reset: string[]
 ): DefaultTheme.SidebarItem[] {
@@ -30,7 +31,15 @@ function createSideBarItems(
     titleFromFile = false,
     titleFromFileByYaml = false
   } = option;
-  const rawNode = readdirSync(join(targetPath, ...reset));
+  const rawNode = readdirSync(join(targetPath, ...reset)).reduce<string[]>(
+    // make index.md to the first
+    (acc, cur) => [
+      'index.md', 'index.MD'
+    ].includes(cur)
+      ? [cur, ...acc]
+      : [...acc, cur],
+    []
+  );
   const node = beforeCreateSideBarItems?.(rawNode) ?? rawNode;
   const currentDir = join(targetPath, ...reset);
   if (ignoreIndexItem && node.length === 1 && node[0] === 'index.md') {
@@ -47,20 +56,29 @@ function createSideBarItems(
       // is directory
       // ignore cur node if items length is 0
       const items = createSideBarItems(join(targetPath), ...reset, fname);
+      let exsistIndex = false;
       // replace directory name, if yes
       let text = fname;
       // get the title in index.md file
       if (exec) {
         const filenames = [
-          join(currentDir, fname, 'index.md'),
-          join(currentDir, fname, 'index.MD'),
-          join(currentDir, fname, fname + '.md')
+          'index.md',
+          'index.MD',
+          `${fname}.md`
         ];
 
         for (const filename of filenames) {
-          const title = exec(filename);
+          const path = join(currentDir, fname, filename);
+          const title = exec(path);
           if (title) {
             text = title;
+            if (filename === 'index.md' || filename === 'index.MD') {
+              const index = items.findIndex(i => i.link?.endsWith('index.html'));
+              if (index !== -1) {
+                items.splice(index, 1);
+                exsistIndex = true;
+              }
+            }
             break;
           }
         }
@@ -71,6 +89,7 @@ function createSideBarItems(
       if (items.length > 0) {
         const sidebarItem: DefaultTheme.SidebarItem = {
           text,
+          link: exsistIndex ? `/${[...reset, fname].join('/')}/` : undefined,
           items
         };
         // vitePress sidebar option collapsed
@@ -109,18 +128,18 @@ function createSideBarItems(
   return sideBarItemsResolved?.(result) ?? result;
 }
 
-function createSideBarGroups(
+function createSideBarGroups (
   targetPath: string,
-  folder: string
-): DefaultTheme.SidebarItem[] {
-  return [
-    {
-      items: createSideBarItems(targetPath, folder)
-    }
-  ];
+  base = ''
+): DefaultTheme.SidebarMulti[string] {
+  return {
+    base,
+    items: createSideBarItems(targetPath)
+  };
 }
 
-function createSidebarMulti(path: string): DefaultTheme.SidebarMulti {
+function createSidebarMulti (path: string, prefix?: string): DefaultTheme.SidebarMulti {
+  const calcPrefix = prefix ? `/${prefix}` : '';
   const {
     ignoreList = [],
     ignoreIndexItem = false,
@@ -133,7 +152,10 @@ function createSidebarMulti(path: string): DefaultTheme.SidebarMulti {
   );
 
   for (const k of node) {
-    data[`/${k}/`] = createSideBarGroups(path, k);
+    data[`${calcPrefix}/${k}/`] = createSideBarGroups(
+      join(path, k),
+      prefix !== undefined ? `${calcPrefix}/${k}/` : undefined
+    );
   }
 
   // is ignored only index.md
@@ -152,12 +174,12 @@ function createSidebarMulti(path: string): DefaultTheme.SidebarMulti {
   return sideBarResolved?.(data) ?? data;
 }
 
-export default function VitePluginVitePressAutoSidebar(
+export default function VitePluginVitePressAutoSidebar (
   opt: SidebarPluginOptionType = {}
 ): Plugin {
   return {
     name: 'vite-plugin-vitepress-auto-sidebar',
-    configureServer({
+    configureServer ({
       watcher,
       restart
     }: ViteDevServer) {
@@ -175,14 +197,23 @@ export default function VitePluginVitePressAutoSidebar(
         }
       });
     },
-    config(config) {
+    config (config) {
       option = opt;
       const { path = '/docs' } = option;
       // increment ignore item
       const docsPath = join(process.cwd(), path);
-      // create sidebar data and insert
-      (config as UserConfig).vitepress.site.themeConfig.sidebar =
-        createSidebarMulti(docsPath);
+      const { vitepress: { site } } = (config as UserConfig);
+      if (site.locales && Object.keys(site.locales).length > 0) {
+        for (const key in site.locales) {
+          const { themeConfig, lang } = site.locales[key];
+          if (!lang) {
+            throw new Error('`lang` is required in locale config');
+          }
+          themeConfig.sidebar = createSidebarMulti(join(docsPath, lang), lang);
+        }
+      } else {
+        site.themeConfig.sidebar = createSidebarMulti(docsPath);
+      }
       log('injected sidebar data successfully');
       return config;
     }

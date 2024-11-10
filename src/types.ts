@@ -6,7 +6,11 @@ export interface SidebarPluginOptionType {
   ignoreIndexItem?: boolean
   deletePrefix?: string | RegExp
   collapsed?: boolean
-  // 是否从文件获取sidebar标题，默认是否
+  /**
+   * Whether to get the sidebar title from the file
+   *
+   * @default false
+   */
   titleFromFile?: boolean
   titleFromFileByYaml?: boolean
   sideBarResolved?: (data: DefaultTheme.SidebarMulti) => DefaultTheme.SidebarMulti
