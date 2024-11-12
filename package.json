@@ -1,7 +1,7 @@
 {
   "name": "@jiek/vite-plugin-vitepress-auto-sidebar",
   "type": "module",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "packageManager": "pnpm@9.1.1",
   "description": "",
   "author": "YiJie",
