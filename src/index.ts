@@ -109,7 +109,6 @@ function createSideBarItems (
           link: exsistIndex ? `/${[...rest, fname].join('/')}/` : undefined,
           items
         };
-        console.log(meta?.collapsed, collapsed);
         // vitePress sidebar option collapsed
         sidebarItem.collapsed = meta?.collapsed ?? collapsed;
         result.push(sidebarItem);
