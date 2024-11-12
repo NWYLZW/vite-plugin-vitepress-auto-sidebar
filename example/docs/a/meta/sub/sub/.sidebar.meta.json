@@ -1,4 +1,5 @@
 {
   "title": "sub sub MetaName",
-  "order": ["b.md", "a.md", "sub"]
+  "order": ["b.md", "a.md", "sub"],
+  "collapsed": true
 }

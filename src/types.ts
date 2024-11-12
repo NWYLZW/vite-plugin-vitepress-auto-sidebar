@@ -16,7 +16,8 @@ export interface SidebarPluginOptionType {
    * ```json
    * {
    *   "title": "xxx",
-   *   "order": ["b.md", "a.md"]
+   *   "order": ["b.md", "a.md"],
+   *   "collapsed": true
    * }
    * ```
    *

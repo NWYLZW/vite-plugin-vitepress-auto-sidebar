@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 
-import { type Plugin, type ViteDevServer } from 'vite';
+import { type Plugin } from 'vite';
 import { type DefaultTheme } from 'vitepress/theme';
 
 import type { SidebarItem, SidebarPluginOptionType, UserConfig } from './types';
@@ -61,6 +61,7 @@ function createSideBarItems (
       const meta: {
         title?: string
         order?: string[]
+        collapsed?: boolean
       } = existsSync(metaPath)
         ? JSON.parse(readFileSync(metaPath, { encoding: 'utf-8' }))
         : undefined;
@@ -108,8 +109,9 @@ function createSideBarItems (
           link: exsistIndex ? `/${[...rest, fname].join('/')}/` : undefined,
           items
         };
+        console.log(meta?.collapsed, collapsed);
         // vitePress sidebar option collapsed
-        sidebarItem.collapsed = collapsed;
+        sidebarItem.collapsed = meta?.collapsed ?? collapsed;
         result.push(sidebarItem);
       }
     } else {
